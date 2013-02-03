@@ -57,7 +57,6 @@ uses. Here will center on numerical formats:
 
 * ''NPY'', ''NPZ'': NumPy own's format
 * Wrappers for ''HDF5'', a standard de-facto format and library: ''PyTables'', ''h5py''
-* Wrappers for NetCDF4, a widely used library based on HDF5: ''netcdf4-python'', ''Scientific.IO.NetCDF''
 
 === Pickling our objects ===
 
@@ -315,7 +314,7 @@ But this comes with a price...
 * It is a binary format, so it is space-efficient.
 * It comes integrated with NumPy.
 
-See also: \href{https://github.com/numpy/numpy/blob/master/doc/neps/npy-format.txt}{A Simple File Format for NumPy Arrays}
+* See also: \href{https://github.com/numpy/numpy/blob/master/doc/neps/npy-format.txt}{A Simple File Format for NumPy Arrays}
 
 ==== NPY exposes the simplest API for NumPy ====[containsverbatim]
 
@@ -408,10 +407,214 @@ test.npz: Zip archive data, at least v2.0 to extract
 * No compression
 [block]>
 
+
+
+=== The HDF5 format ===
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== The HDF5 format ====
+
+* HDF5 (Hierarchical Data Format v5) is a library and file format for storing and managing any kind of data.
+* \href{http://www.hdfgroup.org/HDF5/doc/H5.format.html}{http://www.hdfgroup.org/HDF5/doc/H5.format.html}
+* It supports an unlimited variety of datatypes, and is designed for flexible and efficient I/O and for high volume and complex data.
+* Originally developed at the NCSA, and currently maintained by The THG Group, a not for-profit organization.
+* HDF5 has been around for over twenty years, and has become a standard de-facto format supported by many applications (MatLab, IDL, R, Mathematica ...).
+
+==== Outstanding features of HDF5 ====
+
+* Can store all kinds of data in a variety of ways.
+* Runs on most systems.
+* Lots of tools to access data.
+* Long term format support (HDF-EOS, CGNS).
+* Library and format emphasis on I/O efficiency and different kinds of storage.
+
+==== Python interfaces ====
+
+* '''h5py''' is an attempt to map the HDF5 feature set to Python as closely as possible.
+** It also provides access to nearly all of the HDF5 C API (the so-called low-level API).
+** Not designed to go beyond HDF5/NumPy capabilities.
+
+* '''PyTables''' builds up an additional abstraction layer on top of HDF5 and NumPy where it implements things like:
+** An enhanced type system (enumerated, time, variable length types and default values supported).
+** An engine for enabling complex queries and out-of-core computations (using Numexpr behind the scenes).
+** Advanced indexing capabilities (Optimally Partially Sorted Indices, OPSI)
+
+==== Creating an HDF5 file ====[containsverbatim]
+
+\pyfile[firstline=1, lastline=6]{code/ex_tables.py}
+
+\begin{pyconcode}
+>>> ds
+/reduced_data/array (Array(4,)) ''
+  atom := Int64Atom(shape=(), dflt=0)
+  maindim := 0
+  flavor := 'numpy'
+  byteorder := 'little'
+  chunkshape := None
+\end{pyconcode}
+
+==== Creating an Table ====[containsverbatim]
+
+\pyfile[firstline=8, lastline=10]{code/ex_tables.py}
+
+\begin{pyconcode}
+>>> tab
+/table (Table(1000000,)) ''
+  description := {
+  "f0": Int32Col(shape=(), dflt=0, pos=0),
+  "f1": Int64Col(shape=(), dflt=0, pos=1),
+  "f2": Float64Col(shape=(), dflt=0.0, pos=2)}
+  byteorder := 'little'
+  chunkshape := (6553,)
+\end{pyconcode}
+
+==== Querying a Table ====[containsverbatim]
+
+\begin{pyconcode}
+>>> tab[3]
+(3, 6, 27.0)
+>>> tab[3:2000]
+array([(3, 6, 27.0), (4, 8, 64.0), (5, 10, 125.0), ...,
+       (1997, 3994, 7964053973.0), (1998, 3996, 7976023992.0),
+       (1999, 3998, 7988005999.0)], 
+      dtype=[('f0', '<i4'), ('f1', '<i8'), ('f2', '<f8')])
+
+>>> tab[[3,100]]
+array([(3, 6, 27.0), (100, 200, 1000000.0)], 
+      dtype=[('f0', '<i4'), ('f1', '<i8'), ('f2', '<f8')])
+
+>>> [v[:] for v in tab.where("(f0 > 1) & (f2 < 100)")]
+[(2, 4, 8.0), (3, 6, 27.0), (4, 8, 64.0)]
+\end{pyconcode}
+
+==== Modifying a Table ====[containsverbatim]
+
+\begin{pyconcode}
+>>> tab[0] = (3, 3, 3.0)
+>>> tab[:4]
+array([(3, 3, 3.0), (1, 2, 1.0), (2, 4, 8.0), (3, 6, 27.0)], 
+      dtype=[('f0', '<i4'), ('f1', '<i8'), ('f2', '<f8')])
+
+>>> tab[[1, 3]] = [(4, 4, 4.0)]*2
+>>> tab[:4]
+array([(3, 3, 3.0), (4, 4, 4.0), (2, 4, 8.0), (4, 4, 4.0)], 
+      dtype=[('f0', '<i4'), ('f1', '<i8'), ('f2', '<f8')])
+
+>>> for row in tab.where("(f0 < 4) & (f2 <= 8.)"):
+....:     row['f1'] = 0
+....:     row.update()
+....: 
+>>> tab[:4]
+array([(3, 0, 3.0), (4, 4, 4.0), (2, 0, 8.0), (4, 4, 4.0)], 
+      dtype=[('f0', '<i4'), ('f1', '<i8'), ('f2', '<f8')])
+\end{pyconcode}
+
+==== Annotating you Datasets ====[containsverbatim]
+
+\begin{pyconcode}
+>>> print tab
+/table (Table(1000000,)) ''
+>>> tab.attrs.TITLE = "sample data"
+>>> print tab
+/table (Table(1000000,)) 'sample data'
+>>> tab.attrs.CLASS
+'TABLE'
+>>> tab.attrs.mycomment = "Enjoy data!"
+>>> tab.attrs.complementary_data = np.array([3,2,3])
+>>> tab.attrs.complementary_data
+array([3, 2, 3])
+\end{pyconcode}
+%''
+
+== Adding Compression ==
+
+=== Why compression? ===
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== Why compression? ====
+
+* Files takes less space (the obvious reason).
+* I/O speed can benefit a lot.
+* If compression speed is good enough, it is a nice way to shelve arrays in-memory.
+
+==== Two compression paradigms ====
+
+<[block]{Solid}
+* Data is compressed and decompressed as a whole.
+* A compressed buffer must be decompressed completely before usage.
+* The typical case is compressing a pickle.
+[block]>
+
+<[block]{Chunked}
+* Data is stored compressed in chunks and a chunk is decompressed only when it is needed.
+* Typical case is HDF5 / NetCDF4 files (or compressed filesystems).
+[block]>
+
+=== Solid Compression ===
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== Solid compression ====[containsverbatim]
+
+* Python comes with a series of codecs (compressor/decompressor) that are ready to use.
+* One approach is to compress a pickle:
+
+<[pyconcode]
+>>> a = np.linspace(0, 100, 1e7)
+>>> pa = cPickle.dumps(a, cPickle.HIGHEST_PROTOCOL)
+>>> a.size*a.itemsize, len(pa)
+(80000000, 80000135)
+
+>>> zpa = zlib.compress(pa, 9)
+>>> len(pa), len(zpa), float(len(zpa)) / len(pa)
+(80000135, 52946378, 0.6618286081642237)
+
+>>> bpa = blosc.compress(pa, a.itemsize, 9)
+>>> len(pa), len(bloscpa), float(len(bpa)) / len(pa)
+(80000135, 7634771, 0.09543447645432099)
+[pyconcode]>
+
+==== I/O with a compressed pickle ====[containsverbatim]
+
+* Compressed pickles can be saved easily.
+* Simply treat them as binary streams.
+
+--1cm--
+
+<[pyconcode]
+>>> with open("my_cpickle.bin", "wb") as f:
+...:    f.write(zpa)
+>>> with open("my_cpickle.bin", "rb") as f:
+...:    zpar = f.read()
+>>> assert zpa == zpar
+[pyconcode]>
+
+==== Unpickling a compressed pickle ====[containsverbatim]
+
+* Just decompress it first
+
+--1cm--
+
+<[pyconcode]
+>>> pad = zlib.decompress(zpar)
+>>> assert pa == pad
+>>> a2 = cPickle.loads(pad)
+>>> np.alltrue(a == a2)
+True
+[pyconcode]>
+
+
 ==== Sneak preview: Bloscpack ====[containsverbatim]
 
-* How much could we gain with compression?
-* For example using the @\href{https://github.com/esc/bloscpack}{bloscpack}@ command line comprssion tool
+* An alternative is to use the @\href{https://github.com/esc/bloscpack}{bloscpack}@ command line comprssion tool on the NPY/NPZ data
 
 \begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
 $ ls -sh test.npy
@@ -433,9 +636,122 @@ $ ls -sh test.npz.blp
 
 * Compression ratio: 0.337617
 
+==== Resource consumption for solid compression ====
+
+<[block]{Memory:}
+You need to book some spare memory to keep the compressed pickle.
+[block]>
+
+<[block]{CPU:}
+Compressors consume quite a lot of it, but you may always find a compressor that fits your needs.
+[block]>
+
+For example, for a pickle of @np.linspace(0, 100, 1e7)@:
+
+<[nowiki]
+\begin{center}
+\texttt{\footnotesize }\begin{tabular}{|c|c|c|c|c|}
+\hline 
+(all compressors with level 9) & memcpy & blosc & zlib & bzip2\tabularnewline
+\hline
+\hline 
+final size (MB) & 76 & 7.7 & 50 & 55\tabularnewline
+\hline 
+compress throughput (MB/s) & 3500 & 3600 & 4.8 & 4.5\tabularnewline
+\hline 
+decompress throughput (MB/s) & 3500 & 3500 & 120 & 9.9\tabularnewline
+\hline
+\end{tabular}
+\par\end{center}{\footnotesize \par}
+
+\textrm{\textit{Hardware: 2 x Intel E5520 @ 2.27GHz, 8 MB third level
+cache.}}
+[nowiki]>
+
+=== Chunked compression ===
+
 ==== Outline ====
 
 \tableofcontents[currentsection,currentsubsection]
+
+==== Chunked compression ====
+
+* Data is stored compressed in chunks (on-disk or in-memory)
+* Chunks are decompressed when needed only.
+* HDF5 / NetCDF4 support this paradigm.
+* Saves disk and memory resources and may, in some situations, even accelerate the I/O speed.
+
+==== Examples with PyTables/HDF5 ====
+
+* PyTables includes support for a fair number of compressors: Zlib, Bzip2, LZO and Blosc.
+* It also supports ''shuffle'', an interesting filter designed to improved compression ratios.
+* You can choose whatever combination that proves to be more convenient for your needs.
+
+
+==== Querying compressed data ====
+
+The dataset is a table with real data used in astronomy:
+* 30 columns, most of them floating points and some ints
+* Around 77000 entries
+* Query: all entries where @ra@ > 19 (3\% selectivity)
+
+\begin{center}
+\texttt{\footnotesize }\begin{tabular}{|c|c|c|c|c|}
+\hline 
+(all compressors with level 5) & no compr & blosc & zlib & bzip2\tabularnewline
+\hline
+\hline 
+table size (MB) & 10 & 5.3 & 4.7 & 4.6\tabularnewline
+\hline 
+creation throughput (MB/s) & 330 & 250 & 22 & 7.7\tabularnewline
+\hline 
+query throughput (MB/s) & 170 & 140 & 38 & 10\tabularnewline
+\hline
+\end{tabular}
+\par\end{center}{\footnotesize \par}
+
+==== Effect of chunked compression when writing large datasets ====
+
+<[center]
+    <<<images/create-chunksize-30GB, scale=0.40>>>
+[center]>
+
+==== Effect of chunked compression when reading large datasets ====
+
+<[center]
+    <<<images/sequential-8MB-30GB, scale=0.40>>>
+[center]>
+
+
+==== When should you use compression? ====
+
+* Your data has to be compressible (sparse matrices, time series, data with low entropy, ...).
+* Whether your disk space is tight or your datasets are large.
+* You want to optimize I/O speed.
+
+== Summary ==
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== Summary ====
+
+* Pickle is the most basic, but still powerful, way to serialize Python data.
+** But it is mainly meant for small datasets and it is not portable.
+* Relational databases are portable, mature and solid as a rock.
+** However, they do not interact well with NumPy and write performance is pretty lame.
+* HDF5 show best performance.
+** Python APIs interacts well with NumPy and are extremely portable.
+** They lack safety features.
+* Using compression allows you to deal with more data using the same resources.
+** In general, they can save I/O time to disk.
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+
 
 ==== slide 1 ====
 
