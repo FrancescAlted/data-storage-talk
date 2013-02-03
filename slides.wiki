@@ -1,8 +1,441 @@
-== Section 1 ==
+== The Basics ==
+
+=== Introduction ===
 
 ==== Outline ====
 
-\tableofcontents[currentsection]
+\tableofcontents
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== What does ''serialization'' mean? ====
+
+\begin{quotation}
+Serialization is the process of converting a data structure or object into a
+sequence of bits so that it can be stored in a file or memory buffer, or
+transmitted across a network connection link to be resurrected later in the
+same or another computer environment.
+\end{quotation}
+
+\begin{quotation}
+The basic mechanisms are to flatten object(s) into a one-dimensional
+stream of bits, and to turn that stream of bits back into the original
+object(s).
+\end{quotation}
+
+--1cm--
+
+From: \href{http://www.parashift.com/c++-faq-lite/serialization.html}{http://www.parashift.com/c++-faq-lite/serialization.html}
+
+==== Serialization tools ====
+
+There are literally zillions of serialization tools and formats (text,
+''XML'', or binary based), but well be focusing on those that are:
+
+* Easy to use
+* Space-efficient
+* Fast
+
+In particular, we are not going to discuss text-based formats (e.g.
+''XML'', ''CSV'', ''YAML'' ...) except ''JSON''.
+
+==== Serialization tools that comes with Python ====
+
+Python comes with a complete toolset of modules for serialization
+purposes:
+
+* ''pickle'', and its cousin, ''cPickle'', for quick-and-dirty serialization
+* ''shelve'', a persistent dictionary based on DBM databases
+* A common database API for communicating with relational databases
+
+==== Serialization tools for binary data ====
+
+Additionally, there are lots of third-party libraries for specialized
+uses. Here will center on numerical formats:
+
+* ''NPY'', ''NPZ'': NumPy own's format
+* Wrappers for ''HDF5'', a standard de-facto format and library: ''PyTables'', ''h5py''
+* Wrappers for NetCDF4, a widely used library based on HDF5: ''netcdf4-python'', ''Scientific.IO.NetCDF''
+
+=== Pickling our objects ===
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== The @pickle@ module ====
+
+* Serializes an object into a stream of bytes
+* can be saved to a file (or a string) and later restored
+
+<[example]
+\pyfile{code/ex_pickle.py}
+[example]>
+
+==== What does @pickle@ do ====
+
+* It can serialize both basic Python data structures or user-dened classes.
+
+* Always serializes data, not code (it tries to import classes if found in the pickle).
+<[alertblock]{Warning}
+For security reasons, programs should '''_red_NEVER_''' unpickle data received
+from untrusted sources.
+
+See also: \href{http://nedbatchelder.com/blog/201302/war\_is\_peace.html}{http://nedbatchelder.com/blog/201302/war\_is\_peace.html}
+[alertblock]>
+
+==== Its cPickle cousin ====
+
+* Implemented in C (i.e. significantly faster than @pickle@).
+* But more restrictive (does not allow subclassing of the @Pickler@ and @Unpickler@ objects).
+* Python 3 @pickle@ can use the C implementation transparently.
+
+==== Picklin' a Numpy Array ====[containsverbatim]
+
+\begin{pyconcode}
+>>> a = np.linspace(0, 100, 1e7)
+>>> %timeit pickle.dump(a, open('p1','w'))
+1 loops, best of 3: 8.92 s per loop
+>>> %timeit pickle.dump(a, open('p2','w'), pickle.HIGHEST_PROTOCOL)
+1 loops, best of 3: 509 ms per loop
+>>> ls -sh p1 p2
+186M p1   77M p2
+\end{pyconcode}
+
+<[block]{}
+Always try to use @cPickle@ and @HIGHEST\_PROTOCOL@
+[block]>
+
+==== @pickle/cPickle@ limitations and recommendations ====
+
+* You need to reload all the data in the pickle before you can use any part of it. That might be inconvenient for large datasets.
+* Data can only be retrieved by other Python interpreters. You loose data portability with other languages.
+* Not every object in Python can be serialized by @pickle@ (e.g.  extensions).
+
+==== Recommendations for using @pickle@ ====
+
+* Use it mainly for small data structures.
+* If you have a lot of variables that you want to save, use a dictionary for tying them together first.
+* When using IPython, be sure to use the very convenient @\%store@ magic (it uses @pickle@ under the hood).
+
+=== The @shelve@ module ===
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== The @shelve@ module ====
+
+* Provides support for persitent objects using a special ''shelf'' object.
+* The ''shelf'' behaves like a disk-based dictionary or ''key-value store''.
+* The values of the dictionary can be any object that can be pickled.
+
+==== Example ====[containsverbatim]
+
+\pyfile{code/ex_shelve.py}
+
+\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+$ python code/ex_shelve.py
+'one' 1
+'three' 3
+'two' 2
+\end{minted}
+
+==== Pros and cons of the @shelve@ module ====
+
+<[block]{Pros}
+* Easy to retrieve just a selected set of variables.
+* Specially handy for large pickles.
+[block]>
+
+<[block]{Cons}
+* Suffers the same problems as @pickle@.
+[block]>
+
+=== Relational databases ===
+
+==== Outline ====
+
+\tableofcontents[currentsection, currentsubsection]
+
+==== What's a relational database? ====
+
+* A set of tables containing data fitted into predefined categories.
+* Each table (a relation) contains one or more data categories in columns.
+* Each row contains a unique instance of data for the categories defined by the columns.
+* Data can be accessed in many different ways without having to reorganize the tables.
+
+==== Terminology ====
+
+<[center]
+    <<<images/Relational_database_terms, scale=0.30>>>
+[center]>
+
+
+==== Base and derived relations ====
+
+* In a relational database, all data are stored and accessed via relations.
+* Relations that store data are called ''base relations'', and in implementations are called ''tables''
+* Other relations do not store data, but are computed by applying relational operations to other relations.
+* These relations are sometimes called ''derived relations''
+* In implementations these are called ''views'' or ''queries''
+
+
+==== Example of relational database ====
+
+<[center]
+    <<<images/example-reldatabase, scale=0.5>>>
+[center]>
+
+
+==== Queries with SQL language ====[containsverbatim]
+
+<[block]{Simple query involving one single table (relation):}
+<[minted]{mysql}
+SELECT AuthorName FROM AUTHORS WHERE AuthorBDay > 1970
+[minted]>
+[block]>
+
+<[block]{Complex query involving multiple relations:}
+<[minted]{mysql}
+SELECT AuthorName FROM AUTHORS a, BOOKS b, PUBLISHERS p
+    WHERE AuthorBDay > 1970
+        AND a.AuthorID = b.AuthorID
+        AND b.PubID = p.PubID
+        AND p.Publisher = "Random House"
+    GROUP BY AuthorBDay
+[minted]>
+[block]>
+
+<[alertblock]{Beware}
+complex queries can consume a lot of resources!
+[alertblock]>
+
+==== Relational database API specification ====
+
+* The Python community has developed a standard API for accessing relational databases in a uniform way (PEP 249).
+* Specific database modules (e.g. MySQL, Oracle, Postgres ...) follow this specification, but may add more features.
+* Python comes with SQLite, a relational database accessible via the @sqlite3@ module.
+
+==== ORM (Object Relational Mapping) ====
+
+* The relational database API in Python is powerful, but pretty rough to use and '''not''' object-oriented.
+* Many projects have appeared to add an object-oriented layer on top of this API:
+** SQLAlchemy
+** Django's native ORM
+** Storm
+** Elixir
+** SQLObject (the one that started it all)
+** ... probably a lot more ...
+
+==== Define Objects ====
+
+\pyfile[firstline=1, lastline=15]{code/ex_storm.py}
+
+==== Setup database ====
+
+\pyfile[firstline=17, lastline=23]{code/ex_storm.py}
+
+==== Add Flowers ====
+
+\pyfile[firstline=25, lastline=37]{code/ex_storm.py}
+
+==== Add Vases and commit ====
+
+\pyfile[firstline=39, lastline=48]{code/ex_storm.py}
+
+==== Search and Retrieve ====
+
+\pyfile[firstline=50, lastline=60]{code/ex_storm.py}
+
+==== Executing ====[containsverbatim]
+
+\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+$ python code/ex_storm.py
+[(u'Flowers', u'Red Rose'), (u'Flowers', u'Violet')]
+[(u'Vases', u'Amphora')]
+\end{minted}
+
+==== RDBMs highlights ====
+
+They offer ''ACID'' (atomicity, consistency, isolation, durability) properties, that can be translated into:
+
+* Referential integrity.
+* Transaction support.
+* Data consistency.
+
++ Indexing capabilities (accelerate queries in large tables).
+
+--1cm--
+
+But this comes with a price...
+
+==== RDBMs drawbacks ====
+
+* Insertions are SLOOOW.
+* Not very space-efficient.
+* Not well adapted to handle large numerical datasets (no direct interface with NumPy).
+* You need a knowledgeable RDBM administrator to squeeze all the performance out of them.
+
+
+== Numerical Binary Formats ==
+
+=== Why we need them? ===
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
+
+==== What's a numerical binary format? ====
+
+* It is a format specialized in saving and retrieving large amounts of numerical data.
+* Usually come with libraries that can understand that format.
+* They range from the very simple (NPY) to rather complex and powerful (HDF5).
+* There are a really huge number of numerical formats depending on the needs. Will focus on just on few.
+
+==== Why we need a binary format? ====
+
+* They are closer to memory representation.
+* Their representation is space-efficient (1 byte in-memory \ensuremath{\approx} 1 bytes on disk).
+* They are CPU-friendly (in general you do not have to convert from one representation to another).
+
+==== NumPy: the real cornerstone of numerical interfaces ====
+
+* NumPy is the standard de-facto for dealing with numerical data in-memory.
+* Hence, most of the interfaces to numerical formats in the Python world use NumPy to interact with the database.
+* In some cases the integration is so tight that it could be difficult to say if you are working with NumPy or the interface.
+
+=== The NPY format ===
+
+==== The NPY format ====
+
+* Created back in 2007 for overcoming limitations of @pickle@ for NumPy arrays as well as @numpy.tofile()@ / @numpy.fromfile()@ functions
+* It is a binary format, so it is space-efficient.
+* It comes integrated with NumPy.
+
+See also: \href{https://github.com/numpy/numpy/blob/master/doc/neps/npy-format.txt}{A Simple File Format for NumPy Arrays}
+
+==== NPY exposes the simplest API for NumPy ====[containsverbatim]
+
+\pyfile{code/ex_npy.py}
+
+==== What is in the file? ====[containsverbatim]
+
+<[nowiki]
+\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+$ head -c 100 test.npy 
+NUMPYF{'descr': '<f8', 'fortran_order': False, 'shape': (10000000,), }     
+ð?% 
+$ head -c 100 test.npy | xxd
+0000000: 934e 554d 5059 0100 4600 7b27 6465 7363  .NUMPY..F.{'desc
+0000010: 7227 3a20 273c 6638 272c 2027 666f 7274  r': '<f8', 'fort
+0000020: 7261 6e5f 6f72 6465 7227 3a20 4661 6c73  ran_order': Fals
+0000030: 652c 2027 7368 6170 6527 3a20 2831 3030  e, 'shape': (100
+0000040: 3030 3030 302c 292c 207d 2020 2020 200a  00000,), }     .
+0000050: 0000 0000 0000 0000 0000 0000 0000 f03f  ...............?
+0000060: 0000 0000                                ....
+\end{minted}
+[nowiki]>
+
+... just a header plus binary ...
+
+
+==== Memory-mapping and NPY ====[containsverbatim]
+
+You can open a NPY file in memmap-mode for accessing data directly
+from disk:
+
+\begin{pyconcode}
+>>> mmdata = np.load('test.npy', mmap_mode='r+')
+>>> mmdata
+memmap([  0.00000000e+00,   1.00000000e+00,   2.00000000e+00, ...,
+         9.99999700e+06,   9.99999800e+06,   9.99999900e+06])
+>>> mmdata[-10:] + mmdata[:10]
+memmap([  9999990.,   9999992.,   9999994.,   9999996.,   9999998.,
+        10000000.,  10000002.,  10000004.,  10000006.,  10000008.])
+>>> del mmdata # close access to 'test.npy'
+\end{pyconcode}
+
+
+==== Saving several arrays with NPZ ====[containsverbatim]
+
+The NPY format has a special mode that can save several arrays in
+one single ZIP file (but no compression is used at all!):
+
+\pyfile{code/ex_npz.py}
+
+Just a ZIP file.
+
+\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+$ python ex_npz.py
+$ file test.npz
+test.npz: Zip archive data, at least v2.0 to extract
+\end{minted}
+
+==== Loading several arrays with NPZ ====[containsverbatim]
+
+\begin{pyconcode}
+>>> arrs = np.load('test.npz')
+>>> arrs.items()
+[('a',
+  array([  0.00000000e+00,   1.00000010e-05,   2.00000020e-05, ...,
+         9.99999800e+01,   9.99999900e+01,   1.00000000e+02])),
+ ('sina',
+  array([  0.00000000e+00,   1.00000010e-05,   2.00000020e-05, ...,
+        -5.06382887e-01,  -5.06374264e-01,  -5.06365641e-01]))]
+
+>>> pylab.plot(arrs['a'], arrs['sina'])
+\end{pyconcode}
+
+<[center]
+    <<<images/npz.pdf, scale=0.30>>>
+[center]>
+
+==== Pros and cons of NPY ====
+
+<[block]{Pros:}
+* Binary format, so space-efficient.
+* Avoids duplication of data in memory during saving/loading operations.
+* Array data accessible through memory-mapping.
+[block]>
+
+<[block]{Cons:}
+* The memory mapping feature only allows to deal with files that do not exceed the available virtual memory.
+* Non-standard format outside the NumPy community.
+* No other features than basic input/output (e.g. no metadata allowed).
+* No compression
+[block]>
+
+==== Sneak preview: Bloscpack ====[containsverbatim]
+
+* How much could we gain with compression?
+* For example using the @\href{https://github.com/esc/bloscpack}{bloscpack}@ command line comprssion tool
+
+\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+$ ls -sh test.npy
+77M test.npy
+$ bloscpack compress --level 9 test.npy
+$ ls -sh test.npy.blp
+668K test.npy.blp
+\end{minted}
+
+* Compression ratio: 0.008470
+
+\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+$ ls -sh test.npz
+153M test.npz
+$ bloscpack compress --level 9 test.npz
+$ ls -sh test.npz.blp
+52M test.npz.blp
+\end{minted}
+
+* Compression ratio: 0.337617
+
+==== Outline ====
+
+\tableofcontents[currentsection,currentsubsection]
 
 ==== slide 1 ====
 
