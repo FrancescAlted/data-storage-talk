@@ -741,7 +741,7 @@ query throughput (MB/s) & 170 & 140 & 38 & 10\tabularnewline
 ** But it is mainly meant for small datasets and it is not portable.
 * Relational databases are portable, mature and solid as a rock.
 ** However, they do not interact well with NumPy and write performance is pretty lame.
-* HDF5 show best performance.
+* HDF5 shows best performance.
 ** Python APIs interacts well with NumPy and are extremely portable.
 ** They lack safety features.
 * Using compression allows you to deal with more data using the same resources.
