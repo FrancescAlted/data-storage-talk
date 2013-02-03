@@ -1,0 +1,2448 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{Warsaw}
+% or ...
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Data Persistence
+\end_layout
+
+\begin_layout Subtitle
+From Pickle To Databases
+\end_layout
+
+\begin_layout Author
+Francesc
+\begin_inset space ~
+\end_inset
+
+Alted
+\end_layout
+
+\begin_layout Institute
+PyTables Author
+\begin_inset Newline newline
+\end_inset
+
+Barcelona Music and Audio Tecnology (BMAT)
+\end_layout
+
+\begin_layout Date
+Advanced Scientific Programming in Python
+\begin_inset Newline newline
+\end_inset
+
+2011 Summer School, St Andrews, Scotland 
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+2011 Summer School
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+optional, should be abbreviation of conference name
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If you have a file called "institution-logo-filename.xxx", where xxx is a
+ graphic format that can be processed by latex or pdflatex, resp., then you
+ can add a logo by uncommenting the following:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+pgfdeclareimage[height=3.5cm]{logo}{logo.pdf}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+logo{
+\backslash
+pgfuseimage{logo}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The following causes the table of contents to be shown at the beginning
+ of every subsection.
+ Delete this, if you do not want it.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+AtBeginSubsection[]{
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+frame<beamer>{ 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+frametitle{Outline}   
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+tableofcontents[currentsection,currentsubsection] 
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+tableofcontents[currentsubsection] 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If you wish to uncover everything in a step-wise fashion, uncomment the
+ following command:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+beamerdefaultoverlayspecification{<+->}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Serialization vs Storage Solutions
+\end_layout
+
+\begin_layout Itemize
+We follow the convention that 
+\series bold
+Serialization
+\series default
+ is a way to make persistent data that fits in-memory.
+\end_layout
+
+\begin_layout Itemize
+By 
+\series bold
+Storage Solutions
+\series default
+ we mean ways to keep data on-disk, but without the in-memory limitation.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout AlertBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+Sometimes the limits are fuzzy though!
+\end_layout
+
+\begin_layout BeginFrame
+Outline
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Serialization tools
+\end_layout
+
+\begin_layout BeginFrame
+What 
+\begin_inset Quotes eld
+\end_inset
+
+Serialization
+\begin_inset Quotes erd
+\end_inset
+
+ Means?
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename serial-process.png
+	lyxscale 50
+	scale 35
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Serialization Tools
+\end_layout
+
+\begin_layout Standard
+There are literally zillions of serialization tools and formats (text, XML,
+ or binary based), but we'll be focusing on a few of those that are:
+\end_layout
+
+\begin_layout Itemize
+Easy to use
+\end_layout
+
+\begin_layout Itemize
+Space-efficient
+\end_layout
+
+\begin_layout Itemize
+Fast
+\end_layout
+
+\begin_layout Standard
+In particular, we are not going to discuss text-based formats (e.g.
+ XML, CSV, JSON, YAML ...).
+\end_layout
+
+\begin_layout Subsection
+Serializing (pickling) general objects
+\end_layout
+
+\begin_layout BeginFrame
+The 
+\family typewriter
+pickle
+\family default
+ Module
+\end_layout
+
+\begin_layout Standard
+Serializes an object into a stream of bytes that can be saved to a file
+ and later restored:
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+import pickle
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+obj = SomeObject()
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+f = open(filename, 'wb')
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+pickle.dump(obj, f)
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+f.close()
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+
+\family typewriter
+\size footnotesize
+import pickle
+\end_layout
+
+\begin_layout ExampleBlock
+
+\family typewriter
+\size footnotesize
+f = open(filename, 'rb')
+\end_layout
+
+\begin_layout ExampleBlock
+
+\family typewriter
+\size footnotesize
+obj = pickle.load(f)
+\end_layout
+
+\begin_layout ExampleBlock
+
+\family typewriter
+\size footnotesize
+f.close()
+\end_layout
+
+\begin_layout BeginFrame
+
+\family typewriter
+pickle
+\family default
+ Capabilities
+\end_layout
+
+\begin_layout Itemize
+It can serialize both basic Python data structures or user-defined classes.
+\end_layout
+
+\begin_layout Itemize
+Always serializes data, not code (it tries to import classes if found in
+ the pickle).
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout AlertBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+For security reasons, programs should not unpickle data received from untrusted
+ sources.
+\end_layout
+
+\begin_layout BeginFrame
+Its 
+\family typewriter
+cPickle
+\family default
+ Cousin
+\end_layout
+
+\begin_layout Itemize
+Implemented in C (i.e.
+ significantly faster than 
+\family typewriter
+pickle
+\family default
+).
+\end_layout
+
+\begin_layout Itemize
+But, it is a bit more restrictive (nothing grave).
+\end_layout
+
+\begin_layout Itemize
+Python 3 
+\family typewriter
+pickle
+\family default
+ can use the C implementation transparently.
+\end_layout
+
+\begin_layout BeginFrame
+
+\family typewriter
+pickle/cPickle
+\family default
+ Limitations
+\end_layout
+
+\begin_layout Itemize
+You need to reload all the data in the pickle before you can use any part
+ of it.
+ This is inconvenient for large datasets.
+\end_layout
+
+\begin_layout Itemize
+Data can only be retrieved by other Python interpreters.
+ You loose data portability with other languages.
+\end_layout
+
+\begin_layout BeginFrame
+Recommendations for Using 
+\family typewriter
+pickle
+\end_layout
+
+\begin_layout Itemize
+Use it mainly for small data structures.
+\end_layout
+
+\begin_layout Itemize
+If you have a lot of variables that you want to save, use a dictionary for
+ tying them together first.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+When using the IPython shell, be sure to use the very convenient 
+\family typewriter
+%store
+\family default
+ magic (it uses 
+\family typewriter
+pickle
+\family default
+ under the hood):
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\color black
+>>> A = ['hello',10,'world']
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\color black
+>>> %store A
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\color black
+>>> Exit
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\color black
+$ ipython
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\color black
+>>> print A
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\color black
+['hello', 10, 'world']
+\end_layout
+
+\begin_layout Subsection
+The 
+\family typewriter
+shelve
+\family default
+ module
+\end_layout
+
+\begin_layout BeginFrame
+The 
+\family typewriter
+shelve
+\family default
+ Module
+\end_layout
+
+\begin_layout Itemize
+Provides support for persitent objects using a special 
+\begin_inset Quotes eld
+\end_inset
+
+shelf
+\begin_inset Quotes erd
+\end_inset
+
+ object.
+\end_layout
+
+\begin_layout Itemize
+The 
+\begin_inset Quotes eld
+\end_inset
+
+shelf
+\begin_inset Quotes erd
+\end_inset
+
+ behaves like a disk-based dictionary (DBM-style).
+\end_layout
+
+\begin_layout Itemize
+The values of the dictionary can be any object that can be pickled.
+\end_layout
+
+\begin_layout BeginFrame
+Example with
+\family typewriter
+ shelve
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> import shelve
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> db = shelve.open("database", "c")
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> db["one"] = 1
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> db["two"] = 2
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> db["three"] = 3
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> db.close()
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\color red
+# In another session
+\color inherit
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> db = shelve.open("database", "r")
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>>> 
+\color black
+print db[
+\color inherit
+"one"
+\color black
+]
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+\color black
+1
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+\color black
+>>> print db[
+\color inherit
+"three"
+\color black
+]
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+\color black
+3
+\family default
+\size default
+\color inherit
+ 
+\end_layout
+
+\begin_layout BeginFrame
+Pros and Cons of the 
+\family typewriter
+shelve
+\family default
+ Module
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Pros}
+\end_layout
+
+\end_inset
+
+Easy to retrieve just a selected set of variables.
+\end_layout
+
+\begin_layout Block
+Specially useful for handling large series of pickles.
+\end_layout
+
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Cons}
+\end_layout
+
+\end_inset
+
+Suffers the same problems than 
+\family typewriter
+pickle
+\family roman
+\emph on
+\noun on
+.
+\end_layout
+
+\begin_layout Subsection
+Serializing NumPy objects
+\end_layout
+
+\begin_layout BeginFrame
+Pickling a NumPy Array
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> a = np.linspace(0, 100, 1e7)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> time pickle.dump(a, open('p1','w'))
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+CPU times: user 5.89 s, sys: 0.59 s, total: 6.48 s
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> time pickle.dump(a, open('p2','w'), pickle.HIGHEST_PROTOCOL)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+CPU times: user 0.05 s, sys: 0.12 s, total: 0.16 s
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> time cPickle.dump(a, open('p3','w'), pickle.HIGHEST_PROTOCOL)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+CPU times: user 0.02 s, sys: 0.08 s, total: 0.11 s
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> ls -sh p1 p2 p3
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+186M p1 77M p2 77M p3 
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+Always try to use 
+\family typewriter
+cPickle
+\family default
+ and 
+\family typewriter
+HIGHEST_PROTOCOL.
+\end_layout
+
+\begin_layout BeginFrame
+Pickling & Compression
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> time ap = cPickle.dumps(a, protocol=cPickle.HIGHEST_PROTOCOL)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+CPU times: user 0.03 s, sys: 0.07 s, total: 0.10 s
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+Wall time: 0.10 s
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> time apz = zlib.compress(ap)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+CPU times: user 4.68 s, sys: 0.02 s, total: 4.70 s
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+Wall time: 4.71 s
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> time apb = blosc.compress(ap, a.dtype.itemsize)
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+CPU times: user 0.26 s, sys: 0.00 s, total: 0.26 s
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+Wall time: 0.03 s
+\end_layout
+
+\begin_layout Standard
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+>> len(ap)/1024., len(apz)/1024., len(apb)/1024.
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\size footnotesize
+(78125.1318359375, 51752.8623046875, 7455.8310546875)
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+Compresion can be a huge advantage, most specially with Blosc.
+\end_layout
+
+\begin_layout Section
+Storage solutions
+\end_layout
+
+\begin_layout Subsection
+Relational databases
+\end_layout
+
+\begin_layout BeginFrame
+What Is a Relational Database?
+\end_layout
+
+\begin_layout Itemize
+A relational database matches data by using common characteristics found
+ within the data set.
+\end_layout
+
+\begin_layout Itemize
+The resulting groups of data are organized and are much easier for many
+ people to understand.
+\end_layout
+
+\begin_layout BeginFrame
+Example of the Relational Model
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename example-reldatabase.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Queries with the SQL Language
+\end_layout
+
+\begin_layout Standard
+Simple query involving one single table (relation):
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+SELECT AuthorName FROM AUTHORS WHERE AuthorBDay > 1970
+\end_layout
+
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Standard
+Complex query involving multiple relations:
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+SELECT AuthorName FROM AUTHORS a, BOOKS b, PUBLISHERS p
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+WHERE AuthorBDay > 1970
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+AND a.AuthorID = b.AuthorID
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+AND b.PubID = p.PubID
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+AND p.Publisher = "Random House"
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+GROUP BY AuthorBDay
+\end_layout
+
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Standard
+Beware: complex queries can consume a lot of resources!
+\end_layout
+
+\begin_layout BeginFrame
+Relational Database API Specification
+\end_layout
+
+\begin_layout Itemize
+The Python community has developed a standard API for accessing relational
+ databases in a uniform way (PEP 249).
+\end_layout
+
+\begin_layout Itemize
+Specific database modules (e.g.
+ MySQL, Oracle, Postgres ...) follow this specification, but may add more features.
+\end_layout
+
+\begin_layout Itemize
+Python comes with SQLite, a relational database accessible via the 
+\family typewriter
+sqlite3
+\family default
+ module.
+\end_layout
+
+\begin_layout BeginFrame
+Code Example
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+mycursor.execute(
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+"SELECT match_id from match_cleanmatch 
+\begin_inset Quotes eld
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+"where cleanmatch_id = %s "
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+" AND customer_id = %s",
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+(cleanmatch_id, customer_id))
+\end_layout
+
+\begin_layout Separator
+
+\family typewriter
+rows = self.cursor.fetchall()
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+mycursor.execute(
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+"DELETE FROM cleanmatch_ where id = %s",
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+(cleanmatch_id, ))
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+self.db.commit()
+\family default
+ 
+\end_layout
+
+\begin_layout BeginFrame
+RDBMs Highlights
+\end_layout
+
+\begin_layout Itemize
+ACID (atomicity, consistency, isolation, durability) properties, that can
+ be translated into:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Referential integrity
+\end_layout
+
+\begin_layout Itemize
+Transaction support
+\end_layout
+
+\begin_layout Itemize
+Data consistency
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Indexing capabilities (accelerate queries in large tables)
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+But this comes with a price...
+\end_layout
+
+\begin_layout BeginFrame
+RDBMs Drawbacks
+\end_layout
+
+\begin_layout Itemize
+Insertions and updates are SLOOOW.
+\end_layout
+
+\begin_layout Itemize
+Not very disk space efficient.
+\end_layout
+
+\begin_layout Itemize
+Not well adapted to handle large numerical datasets (no direct interface
+ with NumPy).
+\end_layout
+
+\begin_layout Subsection
+Numerical binary formats: HDF5/NetCDF4
+\end_layout
+
+\begin_layout BeginFrame
+What's a Numerical Binary Format?
+\end_layout
+
+\begin_layout Itemize
+It is a format specialized in saving and retrieving large amounts of numerical
+ data.
+\end_layout
+
+\begin_layout Itemize
+Usually come with libraries that can understand that format.
+\end_layout
+
+\begin_layout Itemize
+There are a really huge number of numerical formats depending on the needs.
+\end_layout
+
+\begin_layout BeginFrame
+Why We Need a Binary Format?
+\end_layout
+
+\begin_layout Itemize
+They are closer to memory representation.
+\end_layout
+
+\begin_layout Itemize
+They are CPU-friendly (in general you do not have to convert from one representa
+tion to another).
+\end_layout
+
+\begin_layout Itemize
+Their representation is space-efficient (1 byte in-memory ≈ 1 bytes on disk).
+\end_layout
+
+\begin_layout BeginFrame
+Drawbacks of Binary Formats
+\end_layout
+
+\begin_layout Itemize
+Lack of standarization (way too many formats out there).
+ But some (HDF5, NetCDF4) are spreading a lot.
+\end_layout
+
+\begin_layout Itemize
+Lack of security features (e.g.
+ no ACID support).
+ Performance is way more important.
+\end_layout
+
+\begin_layout Itemize
+Easy to corrupt files under some conditions (e.g.
+ power outage).
+ Next version of HDF5 (1.10) will implement journaling so as to fix this.
+\end_layout
+
+\begin_layout BeginFrame
+HDF5: Hierachical Data Structures
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename hierarchy.png
+	lyxscale 50
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+NetCDF4
+\end_layout
+
+\begin_layout FrameSubtitle
+network Common Data Form v4
+\end_layout
+
+\begin_layout Itemize
+NetCDF is a set of libraries and data formats that support array-oriented
+ scientific data.
+ 
+\end_layout
+
+\begin_layout Itemize
+NetCDF4 uses HDF5 as the underlying storage layer.
+\end_layout
+
+\begin_layout Itemize
+Creating a netCDF4 file with the netCDF4 library results in an HDF5 file.
+\end_layout
+
+\begin_layout Itemize
+Very spread in Oceanography, Meteorology and similar disciplines.
+\end_layout
+
+\begin_layout BeginFrame
+Python Interfaces
+\end_layout
+
+\begin_layout Standard
+Interfaces to binary formats (HDF5, NetCDF4):
+\end_layout
+
+\begin_layout Itemize
+Interfaces to HDF5:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+PyTables
+\end_layout
+
+\begin_layout Itemize
+h5py
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Interfaces to NetCDF4:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+netcdf4-python
+\end_layout
+
+\begin_layout Itemize
+Scientific.IO.NetCDF
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout AlertBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+All these use NumPy as the default memory container for I/O.
+\end_layout
+
+\begin_layout BeginFrame
+Advantages of Using NumPy As Memory Container
+\end_layout
+
+\begin_layout Standard
+Interfaces for RDBMS in Python lacks support for direct NumPy containers
+ (very inefficient!).
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename RDBMSDataFlow.pdf
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All of the Python interfaces mentioned before are using NumPy as default
+ container.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename HDF5DataFlow.pdf
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Easing Disk Access Via NumPy Paradigm
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename numpy-container.png
+	lyxscale 20
+	scale 20
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\series bold
+array[1]
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\series bold
+\lang american
+array[3:1000, ..., :10]
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+\series bold
+(array1**3 / array2) - sin(array3
+\family default
+\series default
+) 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\color red
+\lang american
+(PyTables)
+\end_layout
+
+\begin_layout Standard
+There is a lot of value in adopting this paradigm: you don't need to learn
+ another one!
+\end_layout
+
+\begin_layout Subsection
+The PyTables database
+\end_layout
+
+\begin_layout BeginFrame
+Easy To Use
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Natural naming}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+# access to file:/group1/table
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+table = file.root.group1.table
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Support for generalized and fancy indexing}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+
+\family typewriter
+\size footnotesize
+array[idx, start:stop, :, start:stop:step] 
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+# hyperslicing
+\end_layout
+
+\begin_layout ExampleBlock
+
+\family typewriter
+\size footnotesize
+array[1, [1,5,10], ..., -1]
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+ # sparse reads (since 2.2)
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Support for efficient queries}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+# get the values in col1 that satisfy a certain condition
+\end_layout
+
+\begin_layout Block
+
+\family typewriter
+\size footnotesize
+[r[’col1’] for r in table.where((1.3 < col3) & (col2 <= 2.))]
+\end_layout
+
+\begin_layout BeginFrame
+How PyTables Fights CPU Starvation?
+\end_layout
+
+\begin_layout Standard
+Basically, by applying blocking techniques and by leveraging high performance
+ packages like:
+\end_layout
+
+\begin_layout Description
+HDF5 A library & format thought out for managing very large datasets in
+ an efficient way.
+\end_layout
+
+\begin_layout Description
+NumPy A Python package for handling large homogeneous and heterogeneous
+ datasets.
+\end_layout
+
+\begin_layout Description
+Numexpr Increase the performance of NumPy in complex operations by applying
+ blocking.
+\end_layout
+
+\begin_layout Description
+Blosc A high-performance compressor meant for binary data (available in
+ the short future).
+\end_layout
+
+\begin_layout BeginFrame
+Advantages of Using HDF5 As Disk Container (I)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename insert-time-pp.png
+	lyxscale 50
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Advantages of Using HDF5 As Disk Container (II)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename size-pp.png
+	lyxscale 50
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+HDF5 + Numexpr + Blosc
+\end_layout
+
+\begin_layout FrameSubtitle
+Delivering extreme performance (while keeping disk requeriments low)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename non-indexed.png
+	lyxscale 50
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Advanced Capabilities in Forthcoming PyTables 2.3
+\end_layout
+
+\begin_layout Standard
+All the features in extinct PyTables Pro have been implemented in the next
+ open source PyTables version:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Column
+\begin_inset space ~
+\end_inset
+
+indexing Queries in tables having up to 1 billion rows can be typically
+ done in less than 1 second.
+\end_layout
+
+\begin_layout Description
+Customizable
+\begin_inset space ~
+\end_inset
+
+index
+\begin_inset space ~
+\end_inset
+
+quality The indexes can be created with an optimization level (specified
+ as a number ranging from 0 to 9).
+\end_layout
+
+\begin_layout Description
+Improved
+\begin_inset space ~
+\end_inset
+
+cache
+\begin_inset space ~
+\end_inset
+
+system for both metadata and regular data.
+ Allows for maximum speed during intensive node browsing and data queries.
+\end_layout
+
+\begin_layout BeginFrame
+Customizable Indexes
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename indexes-sizes2.png
+	lyxscale 50
+	scale 45
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Indexed Query Performance
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename 1g-Q7-zlib1-lzo1-blosc5-indexed.pdf
+	lyxscale 50
+	scale 45
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Summary
+\end_layout
+
+\begin_layout BeginFrame
+Summary
+\end_layout
+
+\begin_layout Itemize
+Pickle is the most basic, but still powerful, way to serialize Python data.
+ But it is mainly meant for small datasets and it is not portable.
+\end_layout
+
+\begin_layout Itemize
+Relational databases are portable, mature and solid as a rock.
+ However, they do not interact well with NumPy and write performance is
+ pretty lame.
+\end_layout
+
+\begin_layout Itemize
+HDF5 / NetCDF4 formats show best performance, Python APIs interacts well
+ with NumPy and are extremely portable.
+ They lack safety features.
+\end_layout
+
+\begin_layout Itemize
+PyTables adds additional bells and whistles beyond HDF5 and NumPy capabilites:
+ efficient queries, indexing and on-disk operations.
+\end_layout
+
+\begin_layout BeginFrame
+More Info
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+beamertemplatebookbibitems
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring References
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Beazley2009"
+
+\end_inset
+
+David Beazley 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ Python -- Essential Reference 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 4th edition 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ Addisson-Wesley, 2009
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring References
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "key-1"
+
+\end_inset
+
+Alan Beaulieu 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+ 
+\emph default
+Learning SQL 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 2nd edition 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ O'Reilly Media, 2009
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+beamertemplatearrowbibitems
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring References
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Kern2007"
+
+\end_inset
+
+PyTables Governance Team 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+ PyTables: hierarchical datasets
+\emph default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/PyTables
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Questions?
+\end_layout
+
+\begin_layout Standard
+Contact:
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\color red
+faltet@pytables.org
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document
