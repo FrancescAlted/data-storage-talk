@@ -39,7 +39,7 @@ There are literally zillions of serialization tools and formats (text,
 * Fast
 
 In particular, we are not going to discuss text-based formats (e.g.
-''XML'', ''CSV'', ''YAML'' ...) except ''JSON''.
+''XML'', ''CSV'', ''YAML'', ''JSON'' ...).
 
 ==== Serialization tools that comes with Python ====
 
