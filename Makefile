@@ -1,10 +1,12 @@
 base = slides
 slidefilename = NAME
 
+.PHONY: git-sha
+
 all: $(base).pdf
 
 git-sha:
-	echo `git describe --tags` > git-sha
+	echo `git describe --tags --always --dirty` > git-sha
 
 $(base).pdf: $(base).tex $(base).wiki.tex $(base).wiki
 	make git-sha
