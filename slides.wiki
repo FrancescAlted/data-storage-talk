@@ -43,7 +43,7 @@ In particular, we are not going to discuss text-based formats (e.g.
 
 ==== Serialization tools that comes with Python ====
 
-Python comes with a complete toolset of modules for serialization
+Python comes with a complete tool set of modules for serialization
 purposes:
 
 * ''pickle'', and its cousin, ''cPickle'', for quick-and-dirty serialization
@@ -55,7 +55,7 @@ purposes:
 Additionally, there are lots of third-party libraries for specialized
 uses. Here will center on numerical formats:
 
-* ''NPY'', ''NPZ'': NumPy own's format
+* ''NPY'', ''NPZ'': NumPy's own format
 * Wrappers for ''HDF5'', a standard de-facto format and library: ''PyTables'', ''h5py''
 
 === Pickling our objects ===
@@ -75,7 +75,7 @@ uses. Here will center on numerical formats:
 
 ==== What does @pickle@ do ====
 
-* It can serialize both basic Python data structures or user-dened classes.
+* It can serialize both basic Python data structures or user-defined classes.
 
 * Always serializes data, not code (it tries to import classes if found in the pickle).
 <[alertblock]{Warning}
@@ -117,7 +117,7 @@ Always try to use @cPickle@ and @HIGHEST\_PROTOCOL@
 
 * Use it mainly for small data structures.
 * If you have a lot of variables that you want to save, use a dictionary for tying them together first.
-* When using IPython, be sure to use the very convenient @\%store@ magic (it uses @pickle@ under the hood).
+* When using Ipython, be sure to use the very convenient @\%store@ magic (it uses @pickle@ under the hood).
 
 === The @shelve@ module ===
 
@@ -127,7 +127,7 @@ Always try to use @cPickle@ and @HIGHEST\_PROTOCOL@
 
 ==== The @shelve@ module ====
 
-* Provides support for persitent objects using a special ''shelf'' object.
+* Provides support for persistent objects using a special ''shelf'' object.
 * The ''shelf'' behaves like a disk-based dictionary or ''key-value store''.
 * The values of the dictionary can be any object that can be pickled.
 
@@ -216,7 +216,9 @@ complex queries can consume a lot of resources!
 
 * The Python community has developed a standard API for accessing relational databases in a uniform way (PEP 249).
 * Specific database modules (e.g. MySQL, Oracle, Postgres ...) follow this specification, but may add more features.
-* Python comes with SQLite, a relational database accessible via the @sqlite3@ module.
+* Python comes with SQLite.
+** SQL Database, but stored as a single file on disk.
+** A relational database accessible via the @sqlite3@ module.
 
 ==== ORM (Object Relational Mapping) ====
 
