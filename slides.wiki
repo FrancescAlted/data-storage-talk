@@ -69,9 +69,7 @@ uses. Here will center on numerical formats:
 * Serializes an object into a stream of bytes
 * can be saved to a file (or a string) and later restored
 
-<[example]
 \pyfile{code/ex_pickle.py}
-[example]>
 
 ==== What does @pickle@ do ====
 
@@ -93,7 +91,7 @@ See also: \href{http://nedbatchelder.com/blog/201302/war\_is\_peace.html}{http:/
 
 ==== Picklin' a Numpy Array ====[containsverbatim]
 
-\begin{pyconcode}
+<[pyconcode]
 >>> a = np.linspace(0, 100, 1e7)
 >>> %timeit pickle.dump(a, open('p1','w'))
 1 loops, best of 3: 8.92 s per loop
@@ -101,7 +99,7 @@ See also: \href{http://nedbatchelder.com/blog/201302/war\_is\_peace.html}{http:/
 1 loops, best of 3: 509 ms per loop
 >>> ls -sh p1 p2
 186M p1   77M p2
-\end{pyconcode}
+[pyconcode]>
 
 <[block]{}
 Always try to use @cPickle@ and @HIGHEST\_PROTOCOL@
@@ -135,21 +133,21 @@ Always try to use @cPickle@ and @HIGHEST\_PROTOCOL@
 
 \pyfile{code/ex_shelve.py}
 
-\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+<[consolecode]
 $ python code/ex_shelve.py
 'one' 1
 'three' 3
 'two' 2
-\end{minted}
+[consolecode]>
 
 ==== Pros and cons of the @shelve@ module ====
 
-<[block]{Pros}
+<[block]{_green_Pros_}
 * Easy to retrieve just a selected set of variables.
 * Specially handy for large pickles.
 [block]>
 
-<[block]{Cons}
+<[block]{_red_Cons_}
 * Suffers the same problems as @pickle@.
 [block]>
 
@@ -253,11 +251,11 @@ complex queries can consume a lot of resources!
 
 ==== Executing ====[containsverbatim]
 
-\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+<[consolecode]
 $ python code/ex_storm.py
 [(u'Flowers', u'Red Rose'), (u'Flowers', u'Violet')]
 [(u'Vases', u'Amphora')]
-\end{minted}
+[consolecode]>
 
 ==== RDBMs highlights ====
 
@@ -324,8 +322,8 @@ But this comes with a price...
 
 ==== What is in the file? ====[containsverbatim]
 
+<[consolecode]
 <[nowiki]
-\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
 $ head -c 100 test.npy 
 NUMPYF{'descr': '<f8', 'fortran_order': False, 'shape': (10000000,), }     
 ð?% 
@@ -337,8 +335,8 @@ $ head -c 100 test.npy | xxd
 0000040: 3030 3030 302c 292c 207d 2020 2020 200a  00000,), }     .
 0000050: 0000 0000 0000 0000 0000 0000 0000 f03f  ...............?
 0000060: 0000 0000                                ....
-\end{minted}
 [nowiki]>
+[consolecode]>
 
 ... just a header plus binary ...
 
@@ -348,7 +346,7 @@ $ head -c 100 test.npy | xxd
 You can open a NPY file in memmap-mode for accessing data directly
 from disk:
 
-\begin{pyconcode}
+<[pyconcode]
 >>> mmdata = np.load('test.npy', mmap_mode='r+')
 >>> mmdata
 memmap([  0.00000000e+00,   1.00000000e+00,   2.00000000e+00, ...,
@@ -357,7 +355,7 @@ memmap([  0.00000000e+00,   1.00000000e+00,   2.00000000e+00, ...,
 memmap([  9999990.,   9999992.,   9999994.,   9999996.,   9999998.,
         10000000.,  10000002.,  10000004.,  10000006.,  10000008.])
 >>> del mmdata # close access to 'test.npy'
-\end{pyconcode}
+[pyconcode]>
 
 
 ==== Saving several arrays with NPZ ====[containsverbatim]
@@ -369,15 +367,15 @@ one single ZIP file (but no compression is used at all!):
 
 Just a ZIP file.
 
-\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+<[consolecode]
 $ python ex_npz.py
 $ file test.npz
 test.npz: Zip archive data, at least v2.0 to extract
-\end{minted}
+[consolecode]>
 
 ==== Loading several arrays with NPZ ====[containsverbatim]
 
-\begin{pyconcode}
+<[pyconcode]
 >>> arrs = np.load('test.npz')
 >>> arrs.items()
 [('a',
@@ -388,7 +386,7 @@ test.npz: Zip archive data, at least v2.0 to extract
         -5.06382887e-01,  -5.06374264e-01,  -5.06365641e-01]))]
 
 >>> pylab.plot(arrs['a'], arrs['sina'])
-\end{pyconcode}
+[pyconcode]>
 
 <[center]
     <<<images/npz.pdf, scale=0.30>>>
@@ -448,7 +446,7 @@ test.npz: Zip archive data, at least v2.0 to extract
 
 \pyfile[firstline=1, lastline=6]{code/ex_tables.py}
 
-\begin{pyconcode}
+<[pyconcode]
 >>> ds
 /reduced_data/array (Array(4,)) ''
   atom := Int64Atom(shape=(), dflt=0)
@@ -456,13 +454,13 @@ test.npz: Zip archive data, at least v2.0 to extract
   flavor := 'numpy'
   byteorder := 'little'
   chunkshape := None
-\end{pyconcode}
+[pyconcode]>
 
 ==== Creating an Table ====[containsverbatim]
 
 \pyfile[firstline=8, lastline=10]{code/ex_tables.py}
 
-\begin{pyconcode}
+<[pyconcode]
 >>> tab
 /table (Table(1000000,)) ''
   description := {
@@ -471,11 +469,11 @@ test.npz: Zip archive data, at least v2.0 to extract
   "f2": Float64Col(shape=(), dflt=0.0, pos=2)}
   byteorder := 'little'
   chunkshape := (6553,)
-\end{pyconcode}
+[pyconcode]>
 
 ==== Querying a Table ====[containsverbatim]
 
-\begin{pyconcode}
+<[pyconcode]
 >>> tab[3]
 (3, 6, 27.0)
 >>> tab[3:2000]
@@ -490,11 +488,11 @@ array([(3, 6, 27.0), (100, 200, 1000000.0)],
 
 >>> [v[:] for v in tab.where("(f0 > 1) & (f2 < 100)")]
 [(2, 4, 8.0), (3, 6, 27.0), (4, 8, 64.0)]
-\end{pyconcode}
+[pyconcode]>
 
 ==== Modifying a Table ====[containsverbatim]
 
-\begin{pyconcode}
+<[pyconcode]
 >>> tab[0] = (3, 3, 3.0)
 >>> tab[:4]
 array([(3, 3, 3.0), (1, 2, 1.0), (2, 4, 8.0), (3, 6, 27.0)], 
@@ -512,11 +510,11 @@ array([(3, 3, 3.0), (4, 4, 4.0), (2, 4, 8.0), (4, 4, 4.0)],
 >>> tab[:4]
 array([(3, 0, 3.0), (4, 4, 4.0), (2, 0, 8.0), (4, 4, 4.0)], 
       dtype=[('f0', '<i4'), ('f1', '<i8'), ('f2', '<f8')])
-\end{pyconcode}
+[pyconcode]>
 
 ==== Annotating you Datasets ====[containsverbatim]
 
-\begin{pyconcode}
+<[pyconcode]
 >>> print tab
 /table (Table(1000000,)) ''
 >>> tab.attrs.TITLE = "sample data"
@@ -528,7 +526,7 @@ array([(3, 0, 3.0), (4, 4, 4.0), (2, 0, 8.0), (4, 4, 4.0)],
 >>> tab.attrs.complementary_data = np.array([3,2,3])
 >>> tab.attrs.complementary_data
 array([3, 2, 3])
-\end{pyconcode}
+[pyconcode]>
 %''
 
 == Adding Compression ==
@@ -618,23 +616,23 @@ True
 
 * An alternative is to use the @\href{https://github.com/esc/bloscpack}{bloscpack}@ command line comprssion tool on the NPY/NPZ data
 
-\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+<[consolecode]
 $ ls -sh test.npy
 77M test.npy
 $ bloscpack compress --level 9 test.npy
 $ ls -sh test.npy.blp
 668K test.npy.blp
-\end{minted}
+[consolecode]>
 
 * Compression ratio: 0.008470
 
-\begin{minted}[fontsize=\footnotesize, , xleftmargin=12pt]{console}
+<[consolecode]
 $ ls -sh test.npz
 153M test.npz
 $ bloscpack compress --level 9 test.npz
 $ ls -sh test.npz.blp
 52M test.npz.blp
-\end{minted}
+[consolecode]>
 
 * Compression ratio: 0.337617
 
