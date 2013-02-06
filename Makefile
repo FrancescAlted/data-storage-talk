@@ -1,5 +1,5 @@
 base = slides
-slidefilename = NAME
+slidefilename = haenel-data-storage
 
 .PHONY: git-sha
 
