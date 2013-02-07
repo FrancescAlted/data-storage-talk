@@ -640,22 +640,35 @@ True
 <[consolecode]
 $ ls -sh test.npy
 77M test.npy
-$ bloscpack compress --level 9 test.npy
+$ time bloscpack compress --clevel 9 test.npy
+bloscpack compress --clevel 9 test.npy  0.20s user 0.08s system 115% cpu 0.240 total
 $ ls -sh test.npy.blp
 668K test.npy.blp
 [consolecode]>
 
 * Compression ratio: 0.008470
+* Not bad, but bear in mind that the example is a linear progression of numbers
+
+==== Sneak preview: Bloscpack ====[containsverbatim]
+
+* What about a more realistic example? (linear and periodic data)
 
 <[consolecode]
 $ ls -sh test.npz
 153M test.npz
-$ bloscpack compress --level 9 test.npz
+$ time bloscpack.py --clevel 9 test.npz
+bloscpack compress --clevel 9 test.npz  1.17s user 0.31s system 139% cpu 1.059 total
 $ ls -sh test.npz.blp
 52M test.npz.blp
 [consolecode]>
 
 * Compression ratio: 0.337617
+
+* Reminder @savez\_compressed@ resulted in
+** a filesize of @109M@
+** in roughly 22 seconds
+* 47\% smaller
+* Much, much faster
 
 ==== Resource consumption for solid compression ====
 
