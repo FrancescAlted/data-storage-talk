@@ -368,10 +368,31 @@ one single ZIP file (but no compression is used at all!):
 Just a ZIP file.
 
 <[consolecode]
-$ python ex_npz.py
+$ time python ex_npz.py
+python ex_npz.py  1.50s user 2.18s system 98% cpu 3.754 total
 $ file test.npz
 test.npz: Zip archive data, at least v2.0 to extract
+$ ls -sh test.npz
+153M test.npz
 [consolecode]>
+
+==== Adding compression ====[containsverbatim]
+
+\pyfile{code/ex_npzc.py}
+
+<[consolecode]
+$ time python ex_npzc.py
+python ex_npzc.py  22.82s user 2.09s system 93% cpu 26.604 total
+$ file testc.npz
+testx.npz: Zip archive data, at least v2.0 to extract
+$ ls -sh testc.npz
+109M testc.npz
+[consolecode]>
+
+* The file is somewhat smaller
+* ... but it takes much longer to save
+
+* Uses the @DEFLATE@ algorithm, which is optimizaed for text, not data
 
 ==== Loading several arrays with NPZ ====[containsverbatim]
 
@@ -404,7 +425,7 @@ test.npz: Zip archive data, at least v2.0 to extract
 * The memory mapping feature only allows to deal with files that do not exceed the available virtual memory.
 * Non-standard format outside the NumPy community.
 * No other features than basic input/output (e.g. no metadata allowed).
-* No compression
+* Has compression, but perhaps the wrong kind
 [block]>
 
 
